@@ -19,7 +19,7 @@ jobs:
           ./plugins.sh
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet plugins.txt; then
+          if git diff --quiet .config/plugins.txt; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
