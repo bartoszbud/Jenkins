@@ -1,0 +1,6 @@
+{
+  "slaves": {
+    "slave1": "sl1",
+    "slave2": "sl2"
+  }
+}

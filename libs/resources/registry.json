@@ -1,0 +1,6 @@
+{
+  "registry": {
+    "ctrInternal": "nexus-int.lab.pl",
+    "ctrExternal": "nexus-ext.lab.pl"
+  }
+}

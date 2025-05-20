@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jenkins
+  namespace: argocd
+spec:
+  destination:
+    namespace: devops
+    server: https://kubernetes.default.svc
+  source:
+    path: ''
+    repoURL: https://charts.jenkins.io/
+    targetRevision: 5.8.47
+    chart: jenkins
+    helm:
+      values: |-
+        controller:
+          admin:
+            username: admin
+            password: jenkins123
+          jenkinsUrl: http://jenkins.lab.pl
+          ingress:
+            enabled: true
+            hostName: jenkins.lab.pl
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              nginx.ingress.kubernetes.io/rewrite-target: /
+            path: /
+            pathType: Prefix
+        persistence:
+          enabled: true
+          storageClass: standard
+          size: 10Gi
+          existingClaim: jenkins-pvc
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true

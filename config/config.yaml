@@ -1,0 +1,181 @@
+jenkins:
+  systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code plugin\n\n"
+  numExecutors: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        # create a user called admin
+        - id: "admin"
+          password: "jenkins123"
+  authorizationStrategy: 
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+#  nodes:
+  clouds:
+    - kubernetes:
+        name: "minikube"
+        
+  views:
+    - list:
+        columns:
+        - "status"
+        - "weather"
+        - "jobName"
+        - "descriptionColumn"
+        - "lastSuccess"
+        - "lastFailure"
+        - "lastDuration"
+        - "buildButton"
+        description: "Organization folders"
+        filterExecutors: true
+        filterQueue: true
+        includeRegex: "^(.*)-org"
+        name: "org"
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - usernamePassword:
+          id: "jenkins-ci"
+          password: "jenkinsci123"
+          scope: GLOBAL
+          username: "jenkins-ci"
+      - usernamePassword:
+          id: "java-ci"
+          password: "javaci123"
+          scope: GLOBAL
+          username: "java-ci"
+      - usernamePassword:
+          id: "pythongram-ci"
+          password: "pythongramci123"
+          scope: GLOBAL
+          username: "pythongram-ci"
+      
+jobs:
+  - script: >
+      organizationFolder('java-org') {
+        description("Java organization folder configured with JCasC")
+        displayName('Java')
+
+        organizations {
+          gitea {
+            serverUrl("http://gitea.lab.pl")
+            repoOwner("Java")
+            credentialsId("java-ci")
+
+            traits {
+
+              giteaTagDiscovery {}
+
+              giteaBranchDiscovery {
+                strategyId(3)
+                // Values
+                //  1 : Exclude branches that are also filed as PRs
+                //  2 : Only branches that are also filed as PRs
+                //  3 : All branches
+              }
+
+              // consider pull requests from origin
+              giteaPullRequestDiscovery {
+                strategyId(1)
+                // Values
+                //  1 : Merging the pull request with the current target branch revision
+                //  2 : The current pull request revision
+                //  3 : Both the current pull request revision and the pull request merged with the current target branch revision
+              }
+            }
+          }
+        }
+
+        // "Orphaned Item Strategy"
+        orphanedItemStrategy {
+          discardOldItems {
+            daysToKeep(-1)
+            numToKeep(-1)
+          }
+        }
+
+        // "Scan Organization Folder Triggers" : 1 day
+        // We need to configure this stuff by hand because JobDSL only allow 'periodic(int min)' for now
+        configure { node ->
+          node / triggers / 'com.cloudbees.hudson.plugins.folder.computed.PeriodicFolderTrigger' {
+            spec('H H * * *')
+            interval(86400000)
+          }
+        }
+      }
+  - script: >
+      organizationFolder('pythongram-org') {
+        description("PythonGram organization folder configured with JCasC")
+        displayName('PythonGram')
+
+        organizations {
+          gitea {
+            serverUrl("http://gitea.lab.pl")
+            repoOwner("PythonGram")
+            credentialsId("pythongram-ci")
+
+            traits {
+
+              giteaTagDiscovery {}
+
+              giteaBranchDiscovery {
+                strategyId(3)
+                // Values
+                //  1 : Exclude branches that are also filed as PRs
+                //  2 : Only branches that are also filed as PRs
+                //  3 : All branches
+              }
+
+              // consider pull requests from origin
+              giteaPullRequestDiscovery {
+                strategyId(1)
+                // Values
+                //  1 : Merging the pull request with the current target branch revision
+                //  2 : The current pull request revision
+                //  3 : Both the current pull request revision and the pull request merged with the current target branch revision
+              }
+            }
+          }
+        }
+
+        // "Orphaned Item Strategy"
+        orphanedItemStrategy {
+          discardOldItems {
+            daysToKeep(-1)
+            numToKeep(-1)
+          }
+        }
+
+        // "Scan Organization Folder Triggers" : 1 day
+        // We need to configure this stuff by hand because JobDSL only allow 'periodic(int min)' for now
+        configure { node ->
+          node / triggers / 'com.cloudbees.hudson.plugins.folder.computed.PeriodicFolderTrigger' {
+            spec('H H * * *')
+            interval(86400000)
+          }
+        }
+      }
+unclassified:
+  giteaServers:
+    servers:
+    - credentialsId: "jenkins-ci"
+      displayName: gitea
+      manageHooks: true
+      serverUrl: http://gitea.lab.pl
+  globalLibraries:
+    libraries:
+      - name: "shared-libs"
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: "http://gitea.lab.pl/Jenkins/jenkins.git"
+  location:
+    adminAddress: admin@lab.pl
+    url: http://jenkins.lab/
+  mailer:
+    replyToAddress: do-not-reply@lab.pl
+    smtpHost: smtp.lab.pl
+    smtpPort: 25
