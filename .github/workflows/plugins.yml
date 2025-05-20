@@ -17,3 +17,25 @@ jobs:
       - name: Run plugins update
         run: |
           ./plugins.sh
+      - name: Check for changes in plugins.txt
+        id: check_changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet plugins.txt; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request if plugins.txt changed
+        if: steps.check_changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update plugins.txt after running plugins.sh
+          branch: update-plugins-$(date +%Y%m%d%H%M%S)
+          title: 'Update plugins.txt'
+          body: 'Automatycznie zaktualizowany plik plugins.txt po uruchomieniu plugins.sh'
+          base: main
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          labels: automated-update
