@@ -10,8 +10,9 @@ JENKINS_API_TOKEN="jenkins123"
 
 # Get local plugin versions
 echo "[INFO] Getting list of installed plugins..."
-plugins=$(curl -s -u "$JENKINS_USER:$JENKINS_API_TOKEN" "$JENKINS_URL/pluginManager/api/json?depth=1" \
+#plugins=$(curl -s -u "$JENKINS_USER:$JENKINS_API_TOKEN" "$JENKINS_URL/pluginManager/api/json?depth=1" \
     | jq -r '.plugins[] | "\(.shortName):\(.version)"')
+plugins=$(cat ./config/plugins.txt)
 
 echo "[INFO] Persist local plugins to file..."
 echo "$plugins" > ./config/plugins.txt
