@@ -63,5 +63,5 @@ jackson2-api:2.19.0-404.vb_b_0fd2fea_e10
 json-api:20250517-153.vc8a_a_d87c0ce3
 kubernetes:4349.v8fe8f2b_ee9f1
 metrics:4.2.32-476.v5042e1c1edd7
-bouncycastle-api:2.30.1.80-256.vf98926042a_9b_
-configuration-as-code:1967.va_968e15fd05b_
+bouncycastle-api:2.30.1.80-261.v00c0e2618ec3
+configuration-as-code:1971.vf9280461ea_89
