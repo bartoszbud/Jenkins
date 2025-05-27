@@ -40,7 +40,7 @@ jobs:
       - name: Check if plugins were updated
         id: check_changes
         run: |
-          git add .config/plugins.txt
+          git add ./config/plugins.txt
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
