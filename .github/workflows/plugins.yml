@@ -50,7 +50,7 @@ jobs:
           fi
 
       - name: Commit and push changes
-        if: steps.check_changes.outputs.changed == 'true' && github.event_name == 'schedule'
+        if: steps.check_changes.outputs.changed == 'true'
         run: |
           git commit -m "Update plugins.txt after running plugins.sh"
           git push origin HEAD
