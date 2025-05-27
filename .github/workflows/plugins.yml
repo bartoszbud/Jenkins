@@ -1,36 +1,64 @@
 name: Plugins Update
+
 on:
   push:
     branches:
       - main
       - feature/*
-    
+  schedule:
+    - cron: '30 0 * * *'  # codziennie o 00:30 UTC
+
 jobs:
-  build:
+  update-plugins:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # wymagane do commitów i pushów
+      pull-requests: write  # wymagane do tworzenia PR
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Make plugins.sh executable
+
+      - name: Setup Git
         run: |
-          chmod +x ./plugins.sh
-      - name: Run plugins update
-        run: |
-          ./plugins.sh
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet .config/plugins.txt; then
-            echo "changed=false" >> $GITHUB_OUTPUT
+
+      - name: Create update branch (only for scheduled runs)
+        if: github.event_name == 'schedule'
+        run: |
+          BRANCH_NAME="feature/update-plugins-$(date +'%Y%m%d%H%M%S')"
+          git checkout -b "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_ENV"
+
+      - name: Make plugins.sh executable
+        run: chmod +x ./plugins.sh
+
+      - name: Run plugins update
+        run: ./plugins.sh
+
+      - name: Check if plugins were updated
+        id: check_changes
+        run: |
+          git add .config/plugins.txt
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create Pull Request if plugins.txt changed
-        if: steps.check_changes.outputs.changed == 'true'
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true' && github.event_name == 'schedule'
+        run: |
+          git commit -m "Update plugins.txt after running plugins.sh"
+          git push origin HEAD
+
+      - name: Create Pull Request to main
+        if: steps.check_changes.outputs.changed == 'true' && github.event_name == 'schedule'
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Update plugins.txt after running plugins.sh
-          branch: update-plugins-$(date +%Y%m%d%H%M%S)
+          branch: ${{ env.branch_name }}
           title: 'Update plugins.txt'
           body: 'Automatycznie zaktualizowany plik plugins.txt po uruchomieniu plugins.sh'
           base: main
