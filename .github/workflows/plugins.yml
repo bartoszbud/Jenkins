@@ -41,7 +41,7 @@ jobs:
         id: check_changes
         run: |
           git add ./config/plugins.txt
-          if git diff --cached --quiet; then
+          if git diff HEAD -- ./config/plugins.txt; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
