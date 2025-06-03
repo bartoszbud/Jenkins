@@ -60,9 +60,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Update plugins.txt after running plugins.sh
-          branch: ${{ github.ref }}
+          branch: main
           title: 'Update plugins.txt'
           body: 'Automatycznie zaktualizowany plik plugins.txt po uruchomieniu plugins.sh'
-          base: main
+          base: ${{ github.ref }}
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           labels: automated-update
