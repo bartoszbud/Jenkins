@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: '30 0 * * *'  # codziennie o 00:30 UTC
 
+permissions:
+  pull-requests: write
+  
 jobs:
   update-plugins:
     runs-on: ubuntu-latest
